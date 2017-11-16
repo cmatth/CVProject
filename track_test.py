@@ -1,3 +1,6 @@
+# Written by Christian S. Perone
+# http://blog.christianperone.com/2015/01/real-time-drone-object-tracking-using-python-and-opencv/
+
 import numpy as np
 import cv2
 
@@ -10,7 +13,7 @@ def run_main():
 
 	# Set the ROI (Region of Interest). Actually, this is a
 	# rectangle of the building that we're tracking
-	c, r, w, h = 900, 650, 70, 70
+	c, r, w, h = 900, 300, 70, 70
 	track_window = (c, r, w, h)
 
 	# Create mask and normalized histogram
