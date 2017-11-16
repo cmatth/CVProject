@@ -6,15 +6,16 @@ import cv2
 
 
 def run_main():
-	cap = cv2.VideoCapture('button.MP4')
+	cap = cv2.VideoCapture('button.mp4')
 
 	# Read the first frame of the video
 	ret, frame = cap.read()
 
 	# Set the ROI (Region of Interest). Actually, this is a
 	# rectangle of the building that we're tracking
-	c, r, w, h = 900, 300, 70, 70
+	c, r, w, h = 1070, 470, 205, 225
 	track_window = (c, r, w, h)
+
 
 	# Create mask and normalized histogram
 	roi = frame[r:r + h, c:c + w]
@@ -23,6 +24,14 @@ def run_main():
 	roi_hist = cv2.calcHist([hsv_roi], [0], mask, [180], [0, 180])
 	cv2.normalize(roi_hist, roi_hist, 0, 255, cv2.NORM_MINMAX)
 	term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 80, 1)
+
+	x, y, w, h = track_window
+	cv2.rectangle(frame, (x, y), (x + w, y + h), 255, 2)
+	cv2.putText(frame, 'Tracked', (x - 25, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+				1, (255, 255, 255), 2, cv2.CV_AA)
+	cv2.imshow('image', frame)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
 	while True:
 		ret, frame = cap.read()
