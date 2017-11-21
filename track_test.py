@@ -6,6 +6,7 @@ import cv2
 
 
 def run_main():
+	#Tim Hills
 
 	adjust_ROI = False #set to true to display only first frame of image to
 					   # to move region of interest frame around, False will
