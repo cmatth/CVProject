@@ -3,15 +3,20 @@
 
 import numpy as np
 import cv2
-
+import Tkinter, tkFileDialog
 
 def run_main():
-	#Tim Hills
 
 	adjust_ROI = False #set to true to display only first frame of image to
 					   # to move region of interest frame around, False will
 					   # play video
-	cap = cv2.VideoCapture('IMG_1922.MOV')
+
+	# Have user select the video file.
+	root = Tkinter.Tk()
+	root.withdraw()
+	video_file_path = tkFileDialog.askopenfilename()
+
+	cap = cv2.VideoCapture(video_file_path)
 
 	# Read the first frame of the video
 	ret, frame = cap.read()
