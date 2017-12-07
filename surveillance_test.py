@@ -2,7 +2,20 @@ import imutils
 import cv2
 import Tkinter
 import tkFileDialog
+import numpy as np
 import matplotlib.pyplot as plt
+
+#def count_frames(vid):
+#    # Determine the number of frames in a recorded video.
+#    tot_frames = 0
+#
+#    while True:
+#        ret, frame = vid.read()
+#        if not ret:
+#            break
+#        tot_frames += 1
+#
+#    return tot_frames
 
 # Have user select the video file.
 root = Tkinter.Tk()
@@ -11,45 +24,46 @@ video_file_path = tkFileDialog.askopenfilename()
 
 cap = cv2.VideoCapture(video_file_path)
 
-# Get first frame of video.
-ret, init_frame = cap.read()
+# Get number of frames in recorded video.
+num_of_frames = 200#count_frames(cap)
 
-# Convert initial frame to gray scale.
-init_frame_grayscale = cv2.cvtColor(init_frame, cv2.COLOR_BGR2GRAY)
-init_frame_grayscale = cv2.GaussianBlur(init_frame_grayscale, (21, 21), 0)
+bgSub = cv2.BackgroundSubtractorMOG()
 
-num_frames = 0
+frame_counter = 0
 
-while num_frames < 100:
+while frame_counter < num_of_frames:
     # Read frames of the video
     ret, next_frame = cap.read()
-    num_frames += num_frames
+    frame_counter += 1
 
-    # Convert initial frame to gray scale.
-    frame_gray_scale = cv2.cvtColor(next_frame, cv2.COLOR_BGR2GRAY)
-    frame_gray_scale = cv2.GaussianBlur(frame_gray_scale, (21,21), 0)
+    if np.mod(frame_counter,15) == 0:
+        bgSub = cv2.BackgroundSubtractorMOG()
 
-    # Compute the difference between each frame throughout the video.
-    frame_diff = abs(init_frame_grayscale - frame_gray_scale)
+    next_frame_short = imutils.resize(next_frame,width=400)
 
-    # Threshold the difference between frames. Index at 1 to make thre_hold a numerical tuple.
-    #thresh_hold = cv2.threshold(frame_diff,25,255,cv2.THRESH_BINARY)[1]
-    thresh_hold = cv2.adaptiveThreshold(frame_diff, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    next_frame_blur = cv2.GaussianBlur(next_frame_short,(3,3),0)
 
-    # Dilate threshold to determine object contours.
-    new_thresh = cv2.dilate(thresh_hold,None,iterations = 2)
+    fgmask = bgSub.apply(next_frame_blur)
 
     # Find contours.
-    contour, _ = cv2.findContours(new_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contour, _ = cv2.findContours(fgmask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Create new contour area array.
+    cont_area_arr = []
+
+    # Determine how many contours are in the frame.
+    num_of_contours = len(contour)
 
     for cont in contour:
-        cont_area = cv2.contourArea(cont)
-        if cont_area < 100:
-            continue
+        #if cv2.contourArea(cont) < 70 and cv2.contourArea(cont) > 150:
+        #   continue
         # Determine bounding box of contour.
         x, y, w, h, = cv2.boundingRect(cont)
-        cv2.rectangle(next_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.imshow("Practice", next_frame)
-        cv2.imshow("Thresh", thresh_hold)
+        cv2.rectangle(next_frame_short, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.imshow("Practice", next_frame_short)
+        cv2.imshow("Thresh", fgmask)
+        print len(contour)
         #cv2.imshow("Change in Frame", frame_diff)
         cv2.waitKey(1)
+        #cont_area_arr.append(cv2.contourArea(cont))
+        #cont_area_arr = np.array(cont_area_arr)
