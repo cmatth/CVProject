@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import bounding_boxes as bb
 import VideoGUI as vg
+from imutils.object_detection import non_max_suppression
 
 # Look into filming a scene for a "long time" to get an initial average frame of reference.
 
@@ -26,7 +27,6 @@ else:
     condition = num_of_frames
 
 bgSub = cv2.BackgroundSubtractorMOG2()
-print bgSub
 
 frame_counter = 0
 
@@ -50,27 +50,21 @@ while frame_counter < num_of_frames:
     # Create new contour area array.
     cont_area_arr = []
 
-    x_arr = []
-    y_arr = []
-    w_arr = []
-    h_arr = []
-
     # Determine how many contours are in the frame.
     num_of_contours = len(contour)
+    rects = []
 
     for cont in contour:
         # Determine bounding box of contour.
         cont_area = cv2.contourArea(cont)
         if cont_area > 1000:
-            x, y, w, h, = cv2.boundingRect(cont)
-            #x_arr.append(x)
-            #y_arr.append(y)
-            #w_arr.append(w)
-            #h_arr.append(h)
+            rects.append(cv2.boundingRect(cont))
+    rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+    #print rects
+    pick = non_max_suppression(rects, probs=None, overlapThresh=0.25)
 
-#    if len(x_arr) > 0:
-#        x, y, w, h = bb.combine_boxes(x_arr, y_arr, w_arr, h_arr)
-        cv2.rectangle(next_frame_short, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    for (xA, yA, xB, yB) in pick:
+        cv2.rectangle(next_frame_short, (xA, yA), (xB, yB), (0, 255, 0), 2)
 
     cv2.imshow("Practice", next_frame_short)
     cv2.imshow("Thresh", fgmask)
