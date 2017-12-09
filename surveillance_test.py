@@ -3,6 +3,7 @@ import cv2
 import Tkinter
 import tkFileDialog
 import numpy as np
+import bounding_boxes as bb
 
 # Look into filming a scene for a "long time" to get an initial average frame of reference.
 
@@ -37,12 +38,12 @@ while True:#frame_counter < num_of_frames:
 
     next_frame_short = imutils.resize(next_frame, width = 400)
 
-    next_frame_blur = cv2.GaussianBlur(next_frame_short, (3,3), 0)
+    next_frame_blur = cv2.GaussianBlur(next_frame_short, (21,21), 0)
 
     fgmask = bgSub.apply(next_frame_blur)
 
     # Dilate to complete outline of shape.
-    dilation = cv2.dilate(fgmask, (5,5), iterations = 5)
+    dilation = cv2.dilate(fgmask, (5,5), iterations = 7)
 
     # Find contours.
     contour, _ = cv2.findContours(fgmask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -61,16 +62,25 @@ while True:#frame_counter < num_of_frames:
     for cont in contour:
         # Determine bounding box of contour.
         cont_area = cv2.contourArea(cont)
-        x, y, w, h, = cv2.boundingRect(cont)
-        #x_arr.append(x)
-        #y_arr.append(y)
-        #w_arr.append(w)
-        #h_arr.append(h)
+        if cont_area > 20:
+            x, y, w, h, = cv2.boundingRect(cont)
+            x_arr.append(x)
+            y_arr.append(y)
+            w_arr.append(w)
+            h_arr.append(h)
+
+    if len(x_arr) > 0:
+        x, y, w, h = bb.combine_boxes(x_arr, y_arr, w_arr, h_arr)
         cv2.rectangle(next_frame_short, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.imshow("Practice", next_frame_short)
-        cv2.imshow("Thresh", fgmask)
-        cv2.waitKey(1)
-        cont_area_arr.append(cont_area)
-        if np.std(cont_area_arr) > np.mean(cont_area_arr):
-            bgSub = cv2.BackgroundSubtractorMOG()
+
+    cv2.imshow("Practice", next_frame_short)
+    #cv2.imshow("Thresh", fgmask)
+    cv2.waitKey(1)
+        #raw_input("next")
+    #cont_area_arr.append(cont_area)
+    if np.std(cont_area_arr) > np.mean(cont_area_arr):
+            #bgSub = cv2.BackgroundSubtractorMOG()
+        pass
     #cv2.imshow("Practice", next_frame_short)
+
+
