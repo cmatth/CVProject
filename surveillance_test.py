@@ -1,9 +1,8 @@
 import imutils
 import cv2
-import Tkinter
-import tkFileDialog
 import numpy as np
 import bounding_boxes as bb
+import VideoGUI as vg
 
 # Look into filming a scene for a "long time" to get an initial average frame of reference.
 
@@ -12,26 +11,25 @@ def count_frames(vid):
     tot_frames = int(vid.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
     return tot_frames
 
-#def global_obj_rect(data):
+video_choice = vg.video_type()
 
-
-# Have user select the video file.
-root = Tkinter.Tk()
-root.withdraw()
-video_file_path = tkFileDialog.askopenfilename()
-
-cap = cv2.VideoCapture(video_file_path)
-
-#cap = cv2.VideoCapture(0)
-
-# Get number of frames in recorded video.
-num_of_frames = count_frames(cap)
+if video_choice == 1:
+    # Condition that continues while loop
+    num_of_frames = np.inf
+    # Index of webcam.
+    cap = cv2.VideoCapture(0)
+else:
+    # Video that user selects.
+    cap = cv2.VideoCapture(video_choice)
+    # Get number of frames in recorded video.
+    num_of_frames = count_frames(cap)
+    condition = num_of_frames
 
 bgSub = cv2.BackgroundSubtractorMOG()
 
 frame_counter = 0
 
-while True:#frame_counter < num_of_frames:
+while frame_counter < num_of_frames:
     # Read frames of the video
     ret, next_frame = cap.read()
     frame_counter += 1
@@ -62,25 +60,20 @@ while True:#frame_counter < num_of_frames:
     for cont in contour:
         # Determine bounding box of contour.
         cont_area = cv2.contourArea(cont)
-        if cont_area > 20:
-            x, y, w, h, = cv2.boundingRect(cont)
-            x_arr.append(x)
-            y_arr.append(y)
-            w_arr.append(w)
-            h_arr.append(h)
+        x, y, w, h, = cv2.boundingRect(cont)
+            #x_arr.append(x)
+            #y_arr.append(y)
+            #w_arr.append(w)
+            #h_arr.append(h)
 
-    if len(x_arr) > 0:
-        x, y, w, h = bb.combine_boxes(x_arr, y_arr, w_arr, h_arr)
+#    if len(x_arr) > 0:
+#        x, y, w, h = bb.combine_boxes(x_arr, y_arr, w_arr, h_arr)
         cv2.rectangle(next_frame_short, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     cv2.imshow("Practice", next_frame_short)
-    #cv2.imshow("Thresh", fgmask)
-    cv2.waitKey(1)
-        #raw_input("next")
-    #cont_area_arr.append(cont_area)
-    if np.std(cont_area_arr) > np.mean(cont_area_arr):
-            #bgSub = cv2.BackgroundSubtractorMOG()
-        pass
-    #cv2.imshow("Practice", next_frame_short)
+    cv2.imshow("Thresh", fgmask)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 
