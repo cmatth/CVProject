@@ -25,7 +25,8 @@ else:
     num_of_frames = count_frames(cap)
     condition = num_of_frames
 
-bgSub = cv2.BackgroundSubtractorMOG()
+bgSub = cv2.BackgroundSubtractorMOG2()
+print bgSub
 
 frame_counter = 0
 
@@ -34,7 +35,7 @@ while frame_counter < num_of_frames:
     ret, next_frame = cap.read()
     frame_counter += 1
 
-    next_frame_short = imutils.resize(next_frame, width = 400)
+    next_frame_short = imutils.resize(next_frame, width = 500)
 
     next_frame_blur = cv2.GaussianBlur(next_frame_short, (21,21), 0)
 
@@ -60,7 +61,8 @@ while frame_counter < num_of_frames:
     for cont in contour:
         # Determine bounding box of contour.
         cont_area = cv2.contourArea(cont)
-        x, y, w, h, = cv2.boundingRect(cont)
+        if cont_area > 1000:
+            x, y, w, h, = cv2.boundingRect(cont)
             #x_arr.append(x)
             #y_arr.append(y)
             #w_arr.append(w)
