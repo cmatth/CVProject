@@ -4,6 +4,11 @@
 import numpy as np
 import cv2
 import Tkinter, tkFileDialog
+import argparse
+import datetime
+import imutils
+import time
+import cv2
 
 def run_main():
 
@@ -23,9 +28,8 @@ def run_main():
 
 	# Set the ROI (Region of Interest). Actually, this is a
 	# rectangle of the building that we're tracking
-	c, r, w, h = 550, 430, 200, 105
+	c, r, w, h = 850, 430, 200, 505
 	track_window = (c, r, w, h)
-
 
 	# Create mask and normalized histogram
 	roi = frame[r:r + h, c:c + w]
