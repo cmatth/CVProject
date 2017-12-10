@@ -5,14 +5,14 @@ import bounding_boxes as bb
 import VideoGUI as vg
 from imutils.object_detection import non_max_suppression
 
-# Look into filming a scene for a "long time" to get an initial average frame of reference.
-
 def count_frames(vid):
     # Determine the number of frames in a recorded video.
     tot_frames = int(vid.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
     return tot_frames
 
 video_choice = vg.video_type()
+
+out_norm = cv2.VideoWriter('Demo.avi', cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'), 20.0, (500, 375))
 
 if video_choice == 1:
     # Condition that continues while loop
@@ -66,10 +66,15 @@ while frame_counter < num_of_frames:
     for (xA, yA, xB, yB) in pick:
         cv2.rectangle(next_frame_short, (xA, yA), (xB, yB), (0, 255, 0), 2)
 
+    out_norm.write(next_frame_short)
+    #out_thresh.write(fgmask)
     cv2.imshow("Practice", next_frame_short)
-    cv2.imshow("Thresh", fgmask)
+    #cv2.imshow("Thresh", fgmask)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+        cap.release()
+        out_norm.release()
+        cv2.destroyAllWindows()
 
 
