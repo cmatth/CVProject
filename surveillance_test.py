@@ -12,7 +12,7 @@ def count_frames(vid):
 
 video_choice = vg.video_type()
 
-out_norm = cv2.VideoWriter('Demo.avi', cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'), 20.0, (500, 375))
+out_norm = cv2.VideoWriter('test.avi', cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'), 10, (500, 375))
 
 if video_choice == 1:
     # Condition that continues while loop
@@ -26,9 +26,10 @@ else:
     num_of_frames = count_frames(cap)
     condition = num_of_frames
 
-bgSub = cv2.BackgroundSubtractorMOG2()
+bgSub = cv2.BackgroundSubtractorMOG2(10, 10, False)
 
 frame_counter = 0
+num = 0
 
 while frame_counter < num_of_frames:
     # Read frames of the video
@@ -39,7 +40,7 @@ while frame_counter < num_of_frames:
 
     next_frame_blur = cv2.GaussianBlur(next_frame_short, (21,21), 0)
 
-    fgmask = bgSub.apply(next_frame_blur)
+    fgmask = bgSub.apply(next_frame_blur, learningRate = 0.001)
 
     # Dilate to complete outline of shape.
     dilation = cv2.dilate(fgmask, (5,5), iterations = 7)
@@ -57,11 +58,11 @@ while frame_counter < num_of_frames:
     for cont in contour:
         # Determine bounding box of contour.
         cont_area = cv2.contourArea(cont)
-        if cont_area > 1000:
+        if cont_area > 700:
             rects.append(cv2.boundingRect(cont))
     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
     #print rects
-    pick = non_max_suppression(rects, probs=None, overlapThresh=0.25)
+    pick = non_max_suppression(rects, probs=None, overlapThresh=0.001)
 
     for (xA, yA, xB, yB) in pick:
         cv2.rectangle(next_frame_short, (xA, yA), (xB, yB), (0, 255, 0), 2)
@@ -69,12 +70,15 @@ while frame_counter < num_of_frames:
     out_norm.write(next_frame_short)
     #out_thresh.write(fgmask)
     cv2.imshow("Practice", next_frame_short)
-    #cv2.imshow("Thresh", fgmask)
+    cv2.imshow("Thresh", fgmask)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
         cap.release()
         out_norm.release()
         cv2.destroyAllWindows()
+        cv2.imwrite("frame.png", next_frame_short)
+        cv2.imwrite("mask.png", fgmask)
+        break
+
 
 
